@@ -458,21 +458,7 @@
   }
 
   // ========== BACKEND ==========
-  async function submitScore(finalScore) {
-    const name = prompt('🏁 Game Over! Masukkan nama kamu:', 'Pemain') || 'Pemain';
-    try {
-      const res = await fetch('/api/scores', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, score: Math.floor(finalScore) }),
-      });
-      if (res.ok) { console.log('✅ Skor tersimpan di server Python!'); showLeaderboard(); }
-    } catch (err) {
-      console.warn('⚠️ Backend Python tidak aktif:', err);
-    }
-  }
-
-  async function showLeaderboard() {
+    async function showLeaderboard() {
     try {
       const res = await fetch('/api/scores');
       const list = await res.json();
@@ -480,4 +466,85 @@
       if (!ol) return;
       ol.innerHTML = list.length
         ? list.map((s) => `<li><strong>${s.name}</strong> — ${s.score}</li>`).join('')
-        : '<li>Belum ada data
+        : '<li>Belum ada data</li>';
+    } catch (err) {
+      console.warn('Gagal ambil leaderboard:', err);
+    }
+  }
+
+  // ========== EVENTS ==========
+  function handleKeyDown(e) {
+    const key = e.key;
+    if ([' ', 'Space', 'ArrowLeft', 'ArrowRight', 'r', 'R'].includes(key)) {
+      e.preventDefault();
+    }
+    if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
+      movePlayer('left');
+    } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
+      movePlayer('right');
+    } else if (key === ' ' || key === 'Space') {
+      if (!gameActive) resetGame();
+    } else if (key === 'r' || key === 'R') {
+      resetGame();
+    }
+  }
+
+  function handleCanvasClick(e) {
+    if (!gameActive) {
+      resetGame();
+    } else {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const clickX = (e.clientX - rect.left) * scaleX;
+      if (clickX < canvas.width / 2) movePlayer('left');
+      else movePlayer('right');
+    }
+  }
+
+  document.getElementById('restartButton').addEventListener('click', (e) => {
+    e.stopPropagation();
+    resetGame();
+  });
+
+  // ========== MENU PILIH MOBIL ==========
+  document.querySelectorAll('.car-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      selectedCar = parseInt(card.dataset.car, 10);
+      carSelector.classList.add('hidden');
+      statusMessage.textContent = `🏎️ ${CARS[selectedCar].name} siap! Tekan SPACE`;
+      initialRender();
+    });
+  });
+
+  // ========== INITIAL RENDER ==========
+  function initialRender() {
+    gameActive = false;
+    render();
+    ctx.font = 'bold 36px "Segoe UI", Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#0ff';
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = '#0ff';
+    ctx.fillText('NEON RACER', canvas.width / 2, canvas.height / 2 - 50);
+    ctx.font = '22px sans-serif';
+    ctx.fillStyle = '#f0f';
+    ctx.shadowColor = '#f0f';
+    ctx.fillText('KLIK / SPACE untuk mulai', canvas.width / 2, canvas.height / 2 + 10);
+    ctx.font = '18px sans-serif';
+    ctx.fillStyle = '#ffd966';
+    ctx.shadowColor = '#ffd966';
+    ctx.fillText(`Mobil: ${CARS[selectedCar].name}`, canvas.width / 2, canvas.height / 2 + 60);
+  }
+
+  // ========== LISTENERS ==========
+  window.addEventListener('keydown', handleKeyDown);
+  canvas.addEventListener('click', handleCanvasClick);
+  window.addEventListener('beforeunload', () => {
+    if (animationId) cancelAnimationFrame(animationId);
+  });
+
+  // ========== START ==========
+  initialRender();
+  showLeaderboard();
+})();
