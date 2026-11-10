@@ -457,8 +457,108 @@
     animationId = requestAnimationFrame(gameLoop);
   }
 
-  // ========== BACKEND ==========
-    async function showLeaderboard() {
+      // ========== STATE LOGIN ==========
+  let currentUser = null;
+  let currentHigh = 0;
+
+  // ========== UI LOGIN ==========
+  const loginPanel = document.getElementById('loginPanel');
+  const loginName = document.getElementById('loginName');
+  const loginPass = document.getElementById('loginPass');
+  const loginBtn = document.getElementById('loginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const guestBtn = document.getElementById('guestBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginMsg = document.getElementById('loginMsg');
+  const welcomeMsg = document.getElementById('welcomeMsg');
+
+  async function apiLogin(name, pass) {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, pass }),
+    });
+    return res.json();
+  }
+
+  async function apiRegister(name, pass) {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, pass }),
+    });
+    return res.json();
+  }
+
+  function onLoginSuccess(user) {
+    currentUser = user;
+    currentHigh = user.high_score || 0;
+    highScore = currentHigh;
+    highScoreDisplay.textContent = highScore;
+    welcomeMsg.textContent = `Halo, ${user.name}! 🏎️`;
+    loginPanel.classList.add('hidden');
+    carSelector.classList.remove('hidden');
+    loginMsg.textContent = '';
+  }
+
+  function onGuest() {
+    currentUser = { name: 'Tamu', high_score: highScore };
+    welcomeMsg.textContent = 'Halo, Tamu! (skor tidak disimpan)';
+    loginPanel.classList.add('hidden');
+    carSelector.classList.remove('hidden');
+  }
+
+  loginBtn.addEventListener('click', async () => {
+    const name = loginName.value.trim();
+    const pass = loginPass.value;
+    if (!name || !pass) { loginMsg.textContent = 'Isi nama & password!'; return; }
+    const data = await apiLogin(name, pass);
+    if (data.error) { loginMsg.textContent = data.error; return; }
+    onLoginSuccess(data.user);
+  });
+
+  registerBtn.addEventListener('click', async () => {
+    const name = loginName.value.trim();
+    const pass = loginPass.value;
+    if (!name || !pass) { loginMsg.textContent = 'Isi nama & password!'; return; }
+    if (name.length < 3) { loginMsg.textContent = 'Nama minimal 3 huruf'; return; }
+    const data = await apiRegister(name, pass);
+    if (data.error) { loginMsg.textContent = data.error; return; }
+    onLoginSuccess(data.user);
+  });
+
+  guestBtn.addEventListener('click', onGuest);
+
+  logoutBtn.addEventListener('click', () => {
+    currentUser = null;
+    carSelector.classList.add('hidden');
+    loginPanel.classList.remove('hidden');
+    loginName.value = '';
+    loginPass.value = '';
+  });
+
+  // ========== BACKEND SKOR ==========
+  async function submitScore(finalScore) {
+    if (!currentUser || currentUser.name === 'Tamu') {
+      console.log('Tamu: skor tidak dikirim ke server');
+      return;
+    }
+    try {
+      const res = await fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: currentUser.id, score: Math.floor(finalScore) }),
+      });
+      if (res.ok) {
+        console.log('✅ Skor tersimpan di SQLite!');
+        showLeaderboard();
+      }
+    } catch (err) {
+      console.warn('⚠️ Backend tidak aktif:', err);
+    }
+  }
+
+  async function showLeaderboard() {
     try {
       const res = await fetch('/api/scores');
       const list = await res.json();
@@ -471,80 +571,3 @@
       console.warn('Gagal ambil leaderboard:', err);
     }
   }
-
-  // ========== EVENTS ==========
-  function handleKeyDown(e) {
-    const key = e.key;
-    if ([' ', 'Space', 'ArrowLeft', 'ArrowRight', 'r', 'R'].includes(key)) {
-      e.preventDefault();
-    }
-    if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
-      movePlayer('left');
-    } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
-      movePlayer('right');
-    } else if (key === ' ' || key === 'Space') {
-      if (!gameActive) resetGame();
-    } else if (key === 'r' || key === 'R') {
-      resetGame();
-    }
-  }
-
-  function handleCanvasClick(e) {
-    if (!gameActive) {
-      resetGame();
-    } else {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const clickX = (e.clientX - rect.left) * scaleX;
-      if (clickX < canvas.width / 2) movePlayer('left');
-      else movePlayer('right');
-    }
-  }
-
-  document.getElementById('restartButton').addEventListener('click', (e) => {
-    e.stopPropagation();
-    resetGame();
-  });
-
-  // ========== MENU PILIH MOBIL ==========
-  document.querySelectorAll('.car-card').forEach((card) => {
-    card.addEventListener('click', () => {
-      selectedCar = parseInt(card.dataset.car, 10);
-      carSelector.classList.add('hidden');
-      statusMessage.textContent = `🏎️ ${CARS[selectedCar].name} siap! Tekan SPACE`;
-      initialRender();
-    });
-  });
-
-  // ========== INITIAL RENDER ==========
-  function initialRender() {
-    gameActive = false;
-    render();
-    ctx.font = 'bold 36px "Segoe UI", Poppins, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = '#0ff';
-    ctx.shadowBlur = 30;
-    ctx.fillStyle = '#0ff';
-    ctx.fillText('NEON RACER', canvas.width / 2, canvas.height / 2 - 50);
-    ctx.font = '22px sans-serif';
-    ctx.fillStyle = '#f0f';
-    ctx.shadowColor = '#f0f';
-    ctx.fillText('KLIK / SPACE untuk mulai', canvas.width / 2, canvas.height / 2 + 10);
-    ctx.font = '18px sans-serif';
-    ctx.fillStyle = '#ffd966';
-    ctx.shadowColor = '#ffd966';
-    ctx.fillText(`Mobil: ${CARS[selectedCar].name}`, canvas.width / 2, canvas.height / 2 + 60);
-  }
-
-  // ========== LISTENERS ==========
-  window.addEventListener('keydown', handleKeyDown);
-  canvas.addEventListener('click', handleCanvasClick);
-  window.addEventListener('beforeunload', () => {
-    if (animationId) cancelAnimationFrame(animationId);
-  });
-
-  // ========== START ==========
-  initialRender();
-  showLeaderboard();
-})();
