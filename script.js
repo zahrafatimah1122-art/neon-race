@@ -73,7 +73,10 @@
   function sfxShield() { beep(500, 0.1, 'triangle', 0.08); setTimeout(() => beep(800, 0.15, 'triangle', 0.08), 80); }
 
   // ========== RESET ==========
-  function resetGame() {
+  function if (!currentUser) return;
+    gameActive = true;
+    score = 0;
+    speed = CARS[selectedCar].speedMul;
     gameActive = true;
     score = 0;
     speed = CARS[selectedCar].speedMul;
@@ -114,11 +117,10 @@
       });
     }
 
-    if (score > highScore) {
-      highScore = Math.floor(score);
-      localStorage.setItem('neonRacerHigh', highScore);
-      highScoreDisplay.textContent = highScore;
-    }
+    if (currentUser && currentUser.name !== 'Tamu') {
+        currentUser.high_score = currentHigh;
+      }
+  }
 
     cancelAnimationFrame(animationId);
     render();
