@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEON RACER · balap mobil keren</title>
   <style>
-    /* === CSS NEON LENGKAP === */
     * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
     body { background: #0b0b1a; min-height: 100vh; display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', system-ui, sans-serif; padding: 16px; }
+    
     .game-wrapper { background: #0f0f1f; border-radius: 42px; padding: 24px; box-shadow: 0 0 30px #00f7ff, 0 0 60px #ff00c8; border: 2px solid rgba(0, 255, 255, 0.5); position: relative; overflow: hidden; width: 100%; max-width: 850px; }
+    
     canvas { display: block; width: 100%; max-width: 800px; height: auto; border-radius: 28px; box-shadow: 0 0 20px #0ff; background: #0a0a14; cursor: pointer; margin: 0 auto; }
     
     .hud { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; padding: 0 12px; color: #fff; flex-wrap: wrap; gap: 10px; }
@@ -18,197 +19,156 @@
     .restart-btn { background: transparent; border: 2px solid #0ff; color: #0ff; font-weight: 800; padding: 10px 24px; border-radius: 40px; cursor: pointer; }
     .status-message { font-size: 0.9rem; background: rgba(0, 0, 0, 0.6); padding: 6px 20px; border-radius: 30px; border: 1px solid #f0f; color: #ffd6ff; }
     
-    /* OVERLAY PANELS */
+    /* AREA PANEL (LOGIN & PILIH MOBIL) */
     .car-selector, .login-panel { 
       position: absolute; inset: 0; 
-      background: rgba(5, 5, 20, 0.95); 
+      background: rgba(5, 5, 20, 0.98); 
       border-radius: 42px; 
       display: flex; flex-direction: column; 
       justify-content: center; align-items: center; 
-      z-index: 100; backdrop-filter: blur(8px); gap: 14px; 
-      transition: opacity 0.4s; 
+      z-index: 99999; /* PALING ATAS */
+      gap: 14px; 
+      transition: opacity 0.3s; 
+      padding: 20px;
     }
-    .hidden { opacity: 0; pointer-events: none; }
+    .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+    
     .login-panel h2, .car-selector h2 { color: #0ff; font-size: 1.8rem; letter-spacing: 4px; text-align: center; text-shadow: 0 0 10px #0ff; }
     
-    .login-panel input { width: 280px; padding: 12px 18px; border-radius: 14px; border: 2px solid #0ff; background: rgba(0, 20, 30, 0.6); color: #fff; outline: none; font-size: 1rem; }
-    .login-actions { display: flex; gap: 12px; }
-    .login-actions button { background: transparent; border: 2px solid #0ff; color: #0ff; font-weight: 700; padding: 10px 26px; border-radius: 30px; cursor: pointer; font-size: 1rem;}
+    /* INPUT & TOMBOL */
+    .login-panel input { width: 100%; max-width: 280px; padding: 12px; border-radius: 14px; border: 2px solid #0ff; background: rgba(0, 20, 30, 0.6); color: #fff; outline: none; font-size: 16px; }
+    .login-actions { display: flex; gap: 12px; margin-top: 5px; }
+    .login-actions button { background: transparent; border: 2px solid #0ff; color: #0ff; font-weight: 700; padding: 10px 26px; border-radius: 30px; cursor: pointer; font-size: 1rem; }
     .login-actions button.ghost { border-color: #f0f; color: #f0f; }
     
-    .guest-btn { font-size: 0.9rem; padding: 10px 20px; margin-top: 15px; background: transparent; border: 2px solid #0ff; color: #0ff; border-radius: 30px; cursor: pointer; }
+    /* TOMBOL TAMU - DIPERBESAR */
+    #guestBtn { 
+      font-size: 1.1rem; 
+      padding: 15px 30px; 
+      margin-top: 20px; 
+      background: rgba(0, 255, 255, 0.1); 
+      border: 2px solid #0ff; 
+      color: #fff; 
+      border-radius: 30px; 
+      cursor: pointer; 
+      width: 100%;
+      max-width: 280px;
+      box-shadow: 0 0 15px #0ff;
+    }
+    #guestBtn:active { background: #0ff; color: #000; }
     
     .welcome { color: #ffd966; font-size: 1rem; text-align: center; margin-bottom: 10px;}
     .car-options { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-    .car-card { background: rgba(0, 20, 30, 0.7); border: 2px solid #0ff; border-radius: 20px; padding: 15px; width: 120px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; color: #fff; font-weight: bold; }
-    .car-preview { width: 60px; height: 80px; border-radius: 10px; }
+    .car-card { background: rgba(0, 20, 30, 0.7); border: 2px solid #0ff; border-radius: 20px; padding: 15px; width: 100px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; color: #fff; font-weight: bold; }
+    .car-preview { width: 50px; height: 70px; border-radius: 10px; }
   </style>
 </head>
 <body>
   <div class="game-wrapper">
     
-    <!-- 1. PANEL LOGIN -->
+    <!-- PANEL LOGIN -->
     <div class="login-panel" id="loginPanel">
-      <h2>🔐 LOGIN NEON RACER</h2>
+      <h2>🔐 LOGIN</h2>
       <input type="text" id="loginName" placeholder="Username" maxlength="12" />
       <input type="password" id="loginPass" placeholder="Password" maxlength="32" />
       <div class="login-actions">
-        <button id="loginBtn" type="button">MASUK</button>
-        <button id="registerBtn" type="button" class="ghost">DAFTAR</button>
+        <button type="button" onclick="alert('Di GitHub Pages tidak bisa login (butuh server Python). Klik Main sebagai Tamu!')">MASUK</button>
+        <button type="button" onclick="alert('Di GitHub Pages tidak bisa daftar (butuh server Python). Klik Main sebagai Tamu!')">DAFTAR</button>
       </div>
-      <p id="loginMsg" style="color: #ff6ba0; font-size: 0.85rem; height: 15px;"></p>
       
       <!-- TOMBOL TAMU -->
-      <button id="guestBtn" class="guest-btn" type="button">Main sebagai Tamu →</button>
+      <button id="guestBtn" type="button">Main sebagai Tamu →</button>
     </div>
 
-    <!-- 2. PANEL PILIH MOBIL -->
+    <!-- PANEL PILIH MOBIL -->
     <div class="car-selector hidden" id="carSelector">
       <h2>PILIH MOBIL</h2>
-      <p class="welcome" id="welcomeMsg">Halo!</p>
+      <p class="welcome">Halo, Tamu! Pilih mobilmu:</p>
       <div class="car-options">
-        <button class="car-card" type="button" data-car="0"><div class="car-preview" style="background:linear-gradient(135deg,#00e0ff,#ff00c8);"></div>CYBER</button>
-        <button class="car-card" type="button" data-car="1"><div class="car-preview" style="background:linear-gradient(135deg,#ffd966,#ff0080);"></div>BLAZE</button>
-        <button class="car-card" type="button" data-car="2"><div class="car-preview" style="background:linear-gradient(135deg,#7bff5e,#00e0ff);"></div>VENOM</button>
+        <button class="car-card" type="button" onclick="startGame()"><div class="car-preview" style="background:linear-gradient(135deg,#00e0ff,#ff00c8);"></div>CYBER</button>
+        <button class="car-card" type="button" onclick="startGame()"><div class="car-preview" style="background:linear-gradient(135deg,#ffd966,#ff0080);"></div>BLAZE</button>
+        <button class="car-card" type="button" onclick="startGame()"><div class="car-preview" style="background:linear-gradient(135deg,#7bff5e,#00e0ff);"></div>VENOM</button>
       </div>
     </div>
 
-    <!-- 3. GAME CANVAS -->
+    <!-- GAME -->
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
     <div class="hud">
       <div class="scoreboard">
         <div><span class="label">SKOR</span><span id="scoreDisplay">0</span></div>
-        <div><span class="label">SPEED</span><span id="speedDisplay">1.0</span></div>
       </div>
       <div class="status-message" id="statusMessage">▶ TEKAN SPACE / KLIK</div>
-      <button class="restart-btn" id="restartButton" type="button">⟳ R</button>
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // LOGIKA TOMBOL & NAVIGASI (ANTI GAGAL KLIK)
-    // ==========================================
-    const loginPanel = document.getElementById('loginPanel');
-    const carSelector = document.getElementById('carSelector');
-    const loginMsg = document.getElementById('loginMsg');
+    // 1. FUNGSI UNTUK TOMBOL TAMU
+    function masukTamu() {
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('carSelector').classList.remove('hidden');
+    }
 
-    // 1. Tombol Tamu
-    document.getElementById('guestBtn').addEventListener('click', function() {
-      loginPanel.classList.add('hidden');
-      carSelector.classList.remove('hidden');
-      document.getElementById('welcomeMsg').innerText = "Halo, Tamu! Pilih mobilmu:";
-    });
+    // 2. FUNGSI UNTUK MULAI GAME
+    let isPlaying = false;
+    function startGame() {
+      document.getElementById('carSelector').classList.add('hidden');
+      document.getElementById('statusMessage').innerText = "🏁 BALAPAN DIMULAI!";
+      isPlaying = true;
+      requestAnimationFrame(gameLoop);
+    }
 
-    // 2. Tombol Login/Daftar (Hanya notifikasi karena Github Pages tidak ada Python)
-    document.getElementById('loginBtn').addEventListener('click', function() {
-      loginMsg.innerText = "Gunakan 'Main sebagai Tamu' di GitHub!";
-    });
-    document.getElementById('registerBtn').addEventListener('click', function() {
-      loginMsg.innerText = "Gunakan 'Main sebagai Tamu' di GitHub!";
-    });
+    // 3. PASANG EVENT KLIK UNTUK TOMBOL TAMU (2 CARA BIAR PASTI JALAN)
+    const tombolTamu = document.getElementById('guestBtn');
+    tombolTamu.addEventListener('click', masukTamu);
+    tombolTamu.addEventListener('touchstart', function(e) {
+      e.preventDefault(); // Cegah double tap di HP
+      masukTamu();
+    }, { passive: false });
 
-    // 3. Tombol Pilih Mobil
-    document.querySelectorAll('.car-card').forEach(function(card) {
-      card.addEventListener('click', function() {
-        carSelector.classList.add('hidden');
-        document.getElementById('statusMessage').innerText = "Mobil siap! Tekan Spasi";
-        initGame(); // Memulai game
-      });
-    });
-
-    // ==========================================
-    // LOGIKA GAME SEDERHANA (CANVAS)
-    // ==========================================
+    // 4. LOGIKA GAME SEDERHANA
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const statusMessage = document.getElementById('statusMessage');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    
-    let gameActive = false;
     let score = 0;
-    let animId = null;
-
-    function initGame() {
-      gameActive = true;
-      score = 0;
-      scoreDisplay.innerText = score;
-      cancelAnimationFrame(animId);
-      gameLoop();
-    }
 
     function gameLoop() {
-      if (!gameActive) return;
+      if (!isPlaying) return;
       
-      // Update Skor
       score += 1;
-      scoreDisplay.innerText = Math.floor(score / 10); // Skor naik perlahan
-      
-      // Gambar Background
-      ctx.fillStyle = '#0a0a14';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Gambar Jalan
-      ctx.fillStyle = '#0d0d1a';
-      ctx.fillRect(100, 0, 600, canvas.height);
-      
-      // Garis Tepi
-      ctx.strokeStyle = '#0ff';
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(100, 0); ctx.lineTo(100, canvas.height);
-      ctx.moveTo(700, 0); ctx.lineTo(700, canvas.height);
-      ctx.stroke();
+      document.getElementById('scoreDisplay').innerText = Math.floor(score / 5);
 
-      // Marka Jalan Animasi
+      // Background
+      ctx.fillStyle = '#0a0a14'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Jalan
+      ctx.fillStyle = '#0d0d1a'; ctx.fillRect(100, 0, 600, canvas.height);
+      
+      // Garis Neon
+      ctx.strokeStyle = '#0ff'; ctx.lineWidth = 5; ctx.shadowBlur = 20; ctx.shadowColor = '#0ff';
+      ctx.beginPath(); ctx.moveTo(100, 0); ctx.lineTo(100, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(700, 0); ctx.lineTo(700, canvas.height); ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Marka
       let offset = (score * 5) % 60;
-      ctx.strokeStyle = '#f0f';
-      ctx.setLineDash([30, 30]);
-      ctx.lineDashOffset = offset;
-      ctx.beginPath();
-      ctx.moveTo(300, 0); ctx.lineTo(300, canvas.height);
-      ctx.moveTo(500, 0); ctx.lineTo(500, canvas.height);
-      ctx.stroke();
+      ctx.strokeStyle = '#f0f'; ctx.lineWidth = 6;
+      ctx.setLineDash([30, 30]); ctx.lineDashOffset = offset;
+      ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(300, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(500, 0); ctx.lineTo(500, canvas.height); ctx.stroke();
       ctx.setLineDash([]);
 
-      // Gambar Mobil Pemain (Kotak Neon)
-      ctx.fillStyle = '#00e0ff';
-      ctx.shadowColor = '#0ff';
-      ctx.shadowBlur = 20;
+      // Mobil
+      ctx.fillStyle = '#00e0ff'; ctx.shadowBlur = 25; ctx.shadowColor = '#0ff';
       ctx.fillRect(372, 480, 56, 100);
-      ctx.shadowBlur = 0; // reset
+      ctx.shadowBlur = 0;
 
-      animId = requestAnimationFrame(gameLoop);
+      requestAnimationFrame(gameLoop);
     }
 
-    // Kontrol Spasi untuk Mulai/Restart
-    window.addEventListener('keydown', function(e) {
-      if (e.key === ' ' || e.key === 'Space') {
-        if (!gameActive) initGame();
-      }
-    });
-    
-    // Klik Canvas untuk Mulai/Restart
-    canvas.addEventListener('click', function() {
-      if (!gameActive) initGame();
-    });
-
-    document.getElementById('restartButton').addEventListener('click', function() {
-       initGame();
-    });
-
-    // Render Awal
-    ctx.fillStyle = '#0a0a14';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#0ff';
-    ctx.font = '30px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.shadowColor = '#0ff';
-    ctx.shadowBlur = 20;
-    ctx.fillText('TEKAN SPASI UNTUK MULAI', canvas.width/2, canvas.height/2);
-    ctx.shadowBlur = 0;
-
+    // Render Awal Canvas
+    ctx.fillStyle = '#0a0a14'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#0ff'; ctx.font = '30px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('TEKAN SPASI ATAU KLIK', canvas.width/2, canvas.height/2);
   </script>
 </body>
 </html>
