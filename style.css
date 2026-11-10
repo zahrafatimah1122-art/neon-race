@@ -16,7 +16,6 @@ body {
   padding: 16px;
 }
 
-/* GAME WRAPPER – efek neon glow */
 .game-wrapper {
   background: #0f0f1f;
   border-radius: 42px;
@@ -24,6 +23,7 @@ body {
   box-shadow: 0 0 30px #00f7ff, 0 0 60px #ff00c8, 0 0 100px rgba(0, 247, 255, 0.3);
   border: 2px solid rgba(0, 255, 255, 0.5);
   transition: box-shadow 0.3s ease;
+  position: relative;
 }
 
 canvas {
@@ -38,7 +38,7 @@ canvas {
   margin: 0 auto;
 }
 
-/* PANEL KONTROL & SKOR */
+/* ===== HUD ===== */
 .hud {
   display: flex;
   justify-content: space-between;
@@ -49,28 +49,31 @@ canvas {
   text-shadow: 0 0 8px cyan, 0 0 16px magenta;
   font-weight: 700;
   letter-spacing: 1px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .scoreboard {
   display: flex;
-  gap: 28px;
+  gap: 18px;
   background: rgba(0, 20, 30, 0.7);
-  padding: 10px 26px;
+  padding: 10px 22px;
   border-radius: 60px;
   backdrop-filter: blur(4px);
   border: 1px solid #0ff;
   box-shadow: inset 0 0 10px #0ff, 0 0 15px #f0f;
+  flex-wrap: wrap;
 }
 
 .scoreboard span {
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: #f0f8ff;
   text-shadow: 0 0 10px #0ff, 0 0 20px #f0f;
 }
 
 .scoreboard .label {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   opacity: 0.8;
   margin-right: 6px;
@@ -84,8 +87,8 @@ canvas {
   border: 2px solid #0ff;
   color: #0ff;
   font-weight: 800;
-  font-size: 1.2rem;
-  padding: 10px 28px;
+  font-size: 1.1rem;
+  padding: 10px 24px;
   border-radius: 40px;
   letter-spacing: 2px;
   cursor: pointer;
@@ -103,12 +106,8 @@ canvas {
   border-color: #f0f;
 }
 
-.restart-btn:active {
-  transform: scale(0.98);
-}
-
 .status-message {
-  font-size: 1.1rem;
+  font-size: 1rem;
   background: rgba(0, 0, 0, 0.6);
   padding: 6px 20px;
   border-radius: 30px;
@@ -116,4 +115,105 @@ canvas {
   box-shadow: 0 0 16px #f0f;
   color: #ffd6ff;
   text-shadow: 0 0 8px magenta;
+}
+
+/* ===== LEADERBOARD ===== */
+.leaderboard {
+  margin-top: 20px;
+  padding: 16px 24px;
+  background: rgba(0, 20, 30, 0.6);
+  border: 2px solid #0ff;
+  border-radius: 20px;
+  box-shadow: 0 0 20px #0ff, 0 0 40px #f0f;
+  color: #e0f7ff;
+  text-shadow: 0 0 8px #0ff;
+  max-width: 800px;
+}
+
+.leaderboard h3 {
+  color: #f0f;
+  text-shadow: 0 0 12px #f0f;
+  margin-bottom: 8px;
+}
+
+.leaderboard ol {
+  padding-left: 22px;
+}
+
+/* ===== MENU PILIH MOBIL ===== */
+.car-selector {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 20, 0.95);
+  border-radius: 42px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  transition: opacity 0.4s ease;
+}
+
+.car-selector.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.car-selector h2 {
+  color: #0ff;
+  font-size: 2rem;
+  letter-spacing: 6px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px #0ff, 0 0 40px #f0f;
+}
+
+.car-options {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.car-card {
+  background: rgba(0, 20, 30, 0.7);
+  border: 2px solid #0ff;
+  border-radius: 20px;
+  padding: 16px;
+  width: 160px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 15px #0ff3;
+  color: #e0f7ff;
+}
+
+.car-card:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 0 30px #0ff, 0 0 50px #f0f;
+  border-color: #f0f;
+}
+
+.car-preview {
+  width: 100px;
+  height: 120px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.4), 0 0 20px currentColor;
+}
+
+.car-name {
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 1.1rem;
+  color: #fff;
+  text-shadow: 0 0 10px #0ff;
+}
+
+.car-stats {
+  font-size: 0.75rem;
+  color: #a0e0ff;
+  letter-spacing: 1px;
 }
