@@ -9,9 +9,23 @@
 <body>
   <div class="game-wrapper">
 
+    <!-- ===== PANEL LOGIN ===== -->
+    <div class="login-panel" id="loginPanel">
+      <h2>🔐 LOGIN NEON RACER</h2>
+      <input type="text" id="loginName" placeholder="Username (3-12 huruf)" maxlength="12" />
+      <input type="password" id="loginPass" placeholder="Password" maxlength="32" />
+      <div class="login-actions">
+        <button id="loginBtn">MASUK</button>
+        <button id="registerBtn" class="ghost">DAFTAR</button>
+      </div>
+      <p class="login-msg" id="loginMsg"></p>
+      <button id="guestBtn" class="ghost small">Main sebagai Tamu →</button>
+    </div>
+
     <!-- ===== MENU PILIH MOBIL ===== -->
-    <div class="car-selector" id="carSelector">
+    <div class="car-selector hidden" id="carSelector">
       <h2>PILIH MOBIL</h2>
+      <p class="welcome" id="welcomeMsg">Halo, Pemain!</p>
       <div class="car-options">
         <button class="car-card" data-car="0">
           <div class="car-preview" style="background:linear-gradient(135deg,#00e0ff,#ff00c8);"></div>
@@ -29,6 +43,7 @@
           <span class="car-stats">BALANCED ⚡⚡⚡</span>
         </button>
       </div>
+      <button id="logoutBtn" class="ghost small">Logout</button>
     </div>
 
     <!-- ===== GAME AREA ===== -->
