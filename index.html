@@ -1,3 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEON RACER · balap mobil keren</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-wrapper">
+
     <!-- ===== PANEL LOGIN ===== -->
     <div class="login-panel" id="loginPanel">
       <h2>🔐 LOGIN<br>NEON RACER</h2>
@@ -11,6 +22,55 @@
       
       <p class="login-msg" id="loginMsg"></p>
       
-      <!-- PERHATIKAN: Tombol tamu saya beri class "ghost small" agar warnanya neon -->
       <button id="guestBtn" class="ghost small" type="button" style="margin-top: 15px;">Main sebagai Tamu →</button>
     </div>
+
+    <!-- ===== MENU PILIH MOBIL ===== -->
+    <div class="car-selector hidden" id="carSelector">
+      <h2>PILIH MOBIL</h2>
+      <p class="welcome" id="welcomeMsg">Halo, Pemain!</p>
+      <div class="car-options">
+        <button class="car-card" data-car="0">
+          <div class="car-preview" style="background:linear-gradient(135deg,#00e0ff,#ff00c8);"></div>
+          <span class="car-name">CYBER</span>
+          <span class="car-stats">SPEED ⚡⚡⚡</span>
+        </button>
+        <button class="car-card" data-car="1">
+          <div class="car-preview" style="background:linear-gradient(135deg,#ffd966,#ff0080);"></div>
+          <span class="car-name">BLAZE</span>
+          <span class="car-stats">HANDLING ⚡⚡</span>
+        </button>
+        <button class="car-card" data-car="2">
+          <div class="car-preview" style="background:linear-gradient(135deg,#7bff5e,#00e0ff);"></div>
+          <span class="car-name">VENOM</span>
+          <span class="car-stats">BALANCED ⚡⚡⚡</span>
+        </button>
+      </div>
+      <button id="logoutBtn" class="ghost small">Logout</button>
+    </div>
+
+    <!-- ===== GAME AREA ===== -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- ===== HUD ===== -->
+    <div class="hud">
+      <div class="scoreboard">
+        <div><span class="label">SKOR</span><span id="scoreDisplay">0</span></div>
+        <div><span class="label">SPEED</span><span id="speedDisplay">1.0</span></div>
+        <div><span class="label">KOIN</span><span id="coinDisplay">0</span></div>
+        <div><span class="label">HI</span><span id="highScoreDisplay">0</span></div>
+      </div>
+      <div class="status-message" id="statusMessage">▶ TEKAN SPACE / KLIK</div>
+      <button class="restart-btn" id="restartButton">⟳ R</button>
+    </div>
+
+    <!-- ===== LEADERBOARD ===== -->
+    <div class="leaderboard">
+      <h3>🏆 TOP SCORES</h3>
+      <ol id="scoreList"><li>Belum ada data</li></ol>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
