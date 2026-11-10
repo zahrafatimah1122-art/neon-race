@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEON RACER · balap mobil keren</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-wrapper">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="hud">
+      <div class="scoreboard">
+        <div><span class="label">SKOR</span><span id="scoreDisplay">0</span></div>
+        <div><span class="label">SPEED</span><span id="speedDisplay">1.0</span></div>
+      </div>
+      <div class="status-message" id="statusMessage">▶ TEKAN SPACE / KLIK</div>
+      <button class="restart-btn" id="restartButton">⟳ R</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
