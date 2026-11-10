@@ -459,7 +459,7 @@
     animationId = requestAnimationFrame(gameLoop);
   }
 
-      // ========== STATE LOGIN ==========
+  // ========== STATE LOGIN ==========
   let currentUser = null;
   let currentHigh = 0;
 
@@ -497,47 +497,76 @@
     currentHigh = user.high_score || 0;
     highScore = currentHigh;
     highScoreDisplay.textContent = highScore;
-    welcomeMsg.textContent = `Halo, ${user.name}! 🏎️`;
-    loginPanel.classList.add('hidden');
-    carSelector.classList.remove('hidden');
-    loginMsg.textContent = '';
+    if(welcomeMsg) welcomeMsg.textContent = `Halo, ${user.name}! 🏎️`;
+    
+    if(loginPanel) loginPanel.classList.add('hidden');
+    if(carSelector) carSelector.classList.remove('hidden');
+    if(loginMsg) loginMsg.textContent = '';
   }
 
   function onGuest() {
     currentUser = { name: 'Tamu', high_score: highScore };
-    welcomeMsg.textContent = 'Halo, Tamu! (skor tidak disimpan)';
-    loginPanel.classList.add('hidden');
-    carSelector.classList.remove('hidden');
+    if(welcomeMsg) welcomeMsg.textContent = 'Halo, Tamu! (skor tidak disimpan)';
+    if(loginPanel) loginPanel.classList.add('hidden');
+    if(carSelector) carSelector.classList.remove('hidden');
   }
 
-  loginBtn.addEventListener('click', async () => {
-    const name = loginName.value.trim();
-    const pass = loginPass.value;
-    if (!name || !pass) { loginMsg.textContent = 'Isi nama & password!'; return; }
-    const data = await apiLogin(name, pass);
-    if (data.error) { loginMsg.textContent = data.error; return; }
-    onLoginSuccess(data.user);
-  });
+  // TOMBOL MASUK
+  if (loginBtn) {
+    loginBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const name = loginName.value.trim();
+      const pass = loginPass.value;
+      if (!name || !pass) { loginMsg.textContent = 'Isi nama & password!'; return; }
+      loginMsg.textContent = 'Menghubungi server...';
+      try {
+        const data = await apiLogin(name, pass);
+        if (data.error) { loginMsg.textContent = data.error; return; }
+        onLoginSuccess(data.user);
+      } catch (err) {
+        loginMsg.textContent = 'Gagal terhubung ke server.';
+      }
+    });
+  }
 
-  registerBtn.addEventListener('click', async () => {
-    const name = loginName.value.trim();
-    const pass = loginPass.value;
-    if (!name || !pass) { loginMsg.textContent = 'Isi nama & password!'; return; }
-    if (name.length < 3) { loginMsg.textContent = 'Nama minimal 3 huruf'; return; }
-    const data = await apiRegister(name, pass);
-    if (data.error) { loginMsg.textContent = data.error; return; }
-    onLoginSuccess(data.user);
-  });
+  // TOMBOL DAFTAR
+  if (registerBtn) {
+    registerBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const name = loginName.value.trim();
+      const pass = loginPass.value;
+      if (!name || !pass) { loginMsg.textContent = 'Isi nama & password!'; return; }
+      if (name.length < 3) { loginMsg.textContent = 'Nama minimal 3 huruf'; return; }
+      loginMsg.textContent = 'Mendaftarkan...';
+      try {
+        const data = await apiRegister(name, pass);
+        if (data.error) { loginMsg.textContent = data.error; return; }
+        onLoginSuccess(data.user);
+      } catch (err) {
+        loginMsg.textContent = 'Gagal terhubung ke server.';
+      }
+    });
+  }
 
-  guestBtn.addEventListener('click', onGuest);
+  // TOMBOL TAMU
+  if (guestBtn) {
+    guestBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      onGuest();
+    });
+  }
 
-  logoutBtn.addEventListener('click', () => {
-    currentUser = null;
-    carSelector.classList.add('hidden');
-    loginPanel.classList.remove('hidden');
-    loginName.value = '';
-    loginPass.value = '';
-  });
+  // TOMBOL LOGOUT
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentUser = null;
+      if(carSelector) carSelector.classList.add('hidden');
+      if(loginPanel) loginPanel.classList.remove('hidden');
+      if(loginName) loginName.value = '';
+      if(loginPass) loginPass.value = '';
+    });
+  }
 
   // ========== BACKEND SKOR ==========
   async function submitScore(finalScore) {
@@ -573,3 +602,47 @@
       console.warn('Gagal ambil leaderboard:', err);
     }
   }
+
+  // ========== MENU PILIH MOBIL ==========
+  document.querySelectorAll('.car-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      selectedCar = parseInt(card.dataset.car, 10);
+      if(carSelector) carSelector.classList.add('hidden');
+      statusMessage.textContent = `🏎️ ${CARS[selectedCar].name} siap! Tekan SPACE`;
+      initialRender();
+    });
+  });
+
+  // ========== INITIAL RENDER ==========
+  function initialRender() {
+    gameActive = false;
+    render();
+    ctx.font = 'bold 36px "Segoe UI", Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#0ff';
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = '#0ff';
+    ctx.fillText('NEON RACER', canvas.width / 2, canvas.height / 2 - 50);
+    ctx.font = '22px sans-serif';
+    ctx.fillStyle = '#f0f';
+    ctx.shadowColor = '#f0f';
+    ctx.fillText('KLIK / SPACE untuk mulai', canvas.width / 2, canvas.height / 2 + 10);
+    ctx.font = '18px sans-serif';
+    ctx.fillStyle = '#ffd966';
+    ctx.shadowColor = '#ffd966';
+    ctx.fillText(`Mobil: ${CARS[selectedCar].name}`, canvas.width / 2, canvas.height / 2 + 60);
+  }
+
+  // ========== LISTENERS BAWAH ==========
+  window.addEventListener('keydown', handleKeyDown);
+  canvas.addEventListener('click', handleCanvasClick);
+  window.addEventListener('beforeunload', () => {
+    if (animationId) cancelAnimationFrame(animationId);
+  });
+
+  // START
+  initialRender();
+  showLeaderboard();
+
+})(); // <--- PASTIKAN TUTUP KURUNG INI ADA DI PALING BAWAH
